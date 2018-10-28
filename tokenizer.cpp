@@ -30,6 +30,7 @@ KeywordRule::KeywordRule(std::string regex, std::string type, bool strict)
 	this->strict = strict;
 }
 
+
 std::vector<int> KeywordRule::getIndices(std::string input, int fromIndex) // returns the bounds of the found string
 {
 	int index = input.find(regex, fromIndex);
@@ -53,6 +54,7 @@ std::vector<int> KeywordRule::getIndices(std::string input, int fromIndex) // re
 
 	return std::vector<int>();
 }
+
 
 std::string KeywordRule::getSequence(std::string token, std::vector<int> indices) // creates the string from the bounds
 {
@@ -104,6 +106,7 @@ std::string BeginEndRule::getSequence(std::string token, std::vector<int> indice
 {
 	return token.substr(indices[0], indices[1] - indices[0]);
 }
+
 
 std::vector<Token> Tokenizer::tokenize(std::string source) // Starts the tokenizer
 {
@@ -160,6 +163,7 @@ std::vector<Token> Tokenizer::processRule(Token token, int ruleIndex) // Looks f
 
 				newTokens.push_back(regexToken);
 			}
+      
 			else // found string starts at the beginning, so only create one token
 			{
 				// Add this token
@@ -167,6 +171,7 @@ std::vector<Token> Tokenizer::processRule(Token token, int ruleIndex) // Looks f
 				newTokens.push_back(regexToken);
 			}
 		}
+    
 		else // if the string has already been found, start at the end of the last occurence
 		{
 			int lastTokenEnd = lastIndices[1];
@@ -175,6 +180,7 @@ std::vector<Token> Tokenizer::processRule(Token token, int ruleIndex) // Looks f
 				// Add two tokens
 				Token preRegexToken = Token(token.str.substr(lastTokenEnd, currentIndices[0] - lastTokenEnd), token.type);
 				Token regexToken = Token(rule->getSequence(token.str, currentIndices), rule->type);
+
 
 				std::vector<Token> processedTokens = processRule(preRegexToken, ruleIndex + 1); // process the next rule recursively for the characters to the left
 				if (!processedTokens.empty())
@@ -188,6 +194,7 @@ std::vector<Token> Tokenizer::processRule(Token token, int ruleIndex) // Looks f
 
 				newTokens.push_back(regexToken);
 			}
+
 			else // found string starts at the beginning, so only create one token
 			{
 				// Add this token
@@ -198,11 +205,13 @@ std::vector<Token> Tokenizer::processRule(Token token, int ruleIndex) // Looks f
 
 		lastIndices = currentIndices;
 
+
 		if (currentIndices[1] < (int)token.str.length() && rule->getIndices(token.str, currentIndices[1]).empty()) // if no more occurences of the string are found, 
 			// don't discard the characters to the right of the last found occurence but create a token for them
 		{
 			// This was the last found occurence of the regex
 			Token lastToken = Token(token.str.substr(currentIndices[1]), token.type);
+
 
 			std::vector<Token> processedTokens = processRule(lastToken, ruleIndex + 1); // process the next rule recursively for the characters to the right
 			if (!processedTokens.empty())
@@ -233,6 +242,7 @@ std::vector<Token> Tokenizer::processRule(Token token, int ruleIndex) // Looks f
 
 	return newTokens;
 }
+
 
 void Tokenizer::skipWhitespace(std::vector<Token>& tokens) // remove all whitespace and remove tokens that contain only whitespace
 {
